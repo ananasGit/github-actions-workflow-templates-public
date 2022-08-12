@@ -88,14 +88,14 @@ jobs:
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
-        if: inputs.SONARQUBE_PROJECT_KEY != ""
+        if: inputs.SONARQUBE_PROJECT_KEY != ''
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
 
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@master
-        if: inputs.SONARQUBE_PROJECT_KEY != ""
+        if: inputs.SONARQUBE_PROJECT_KEY != ''
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
