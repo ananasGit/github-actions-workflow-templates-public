@@ -104,13 +104,6 @@ jobs:
     needs: validate_deploy
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: 'ananasGit/github-actions-workflow-templates-scripts'
-          token: ${{ secrets.CHECKOUT_TOKEN }}
-          path: 'workflow-scripts'
-          fetch-depth: 1
-
       - name: Clone Repository (Latest)
         uses: actions/checkout@v3
         if: inputs.GIT_REF == ''
@@ -120,6 +113,13 @@ jobs:
         if: inputs.GIT_REF != ''
         with:
           ref: ${{ inputs.GIT_REF }}
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
