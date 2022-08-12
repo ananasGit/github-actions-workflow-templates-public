@@ -88,7 +88,7 @@ jobs:
         env:
           TAG: ${{ steps.tagger.outputs.tag }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/common/show-tag.sh
+          $GITHUB_WORKSPACE/workflow-scripts/qa/show-tag.sh
 
       - name: Abort job on tag
         env:
@@ -96,7 +96,7 @@ jobs:
           SKIP_TAG: ${{ inputs.SKIP_TAG }}
           GIT_REF: ${{ inputs.GIT_REF }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/common/abort-job-on-tag.sh
+          $GITHUB_WORKSPACE/workflow-scripts/qa/abort-job-on-tag.sh
 
   deploy:
     name: ArgoCD Deploy
