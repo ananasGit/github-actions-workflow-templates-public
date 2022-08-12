@@ -108,7 +108,7 @@ jobs:
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: | 
-          inputs.PUBLISH_UNIT_TEST_RESULTS
+          inputs.PUBLISH_UNIT_TEST_RESULTS == "true"
         with:
           files: build/test-results/**/*.xml
 
@@ -172,6 +172,11 @@ jobs:
           ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
 
       - name: Create local changes
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/create-local-changes.sh
 
