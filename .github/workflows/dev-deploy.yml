@@ -9,6 +9,10 @@ on:
         type: string
         description: built branch
         required: true
+      DOCKER_FILE:
+        type: string
+        description: built branch
+        required: true
       JAVA_VERSION:
         type: string
         description: argo cd repo
@@ -84,7 +88,7 @@ jobs:
         env:
           CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
         run: |
-          $GITHUB_WORKSPACE//workflow-scripts/dev/build-with-gradle.sh
+          $GITHUB_WORKSPACE/workflow-scripts/dev/build-with-gradle.sh
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
