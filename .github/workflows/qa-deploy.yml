@@ -139,6 +139,7 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: argocd
           ref: ${{ env.ARGO_CD_REPO_BRANCH }}
+          fetch-depth: 1
 
       - name: Create local changes
         if: inputs.GIT_REF == ''
