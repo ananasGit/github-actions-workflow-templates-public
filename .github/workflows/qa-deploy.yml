@@ -104,6 +104,12 @@ jobs:
     needs: validate_deploy
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
       - name: Clone Repository (Latest)
         uses: actions/checkout@v3
         if: inputs.GIT_REF == ''
