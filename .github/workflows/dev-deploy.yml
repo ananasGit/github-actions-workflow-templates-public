@@ -107,7 +107,7 @@ jobs:
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
-        if: | 
+        if: |
           inputs.PUBLISH_UNIT_TEST_RESULTS == 'true'
         with:
           files: build/test-results/**/*.xml
@@ -148,9 +148,10 @@ jobs:
           fetch-depth: 1
 
       - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
+        shell: bash
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/common/extract-branch.sh
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1

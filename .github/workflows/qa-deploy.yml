@@ -121,8 +121,8 @@ jobs:
           ref: ${{ inputs.GIT_REF }}
 
       - name: Extract branch name
-        shell: bash
         id: extract_branch
+        shell: bash
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/common/extract-branch.sh
 
