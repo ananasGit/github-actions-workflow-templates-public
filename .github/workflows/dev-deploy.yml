@@ -43,6 +43,9 @@ on:
         required: false
         default: false
     secrets:
+      AWS_REGION:
+        description: aws region
+        required: true
       AWS_ACCESS_KEY_ID:
         description: aws access key
         required: true
