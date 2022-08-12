@@ -104,15 +104,15 @@ jobs:
     needs: validate_deploy
 
     steps:
-      - name: Clone Repository (Latest)
-        uses: actions/checkout@v3
-        if: inputs.GIT_REF == ''
-
-      - name: Clone Repository (Custom Ref)
-        uses: actions/checkout@v3
-        if: inputs.GIT_REF != ''
-        with:
-          ref: ${{ inputs.GIT_REF }}
+#      - name: Clone Repository (Latest)
+#        uses: actions/checkout@v3
+#        if: inputs.GIT_REF == ''
+#
+#      - name: Clone Repository (Custom Ref)
+#        uses: actions/checkout@v3
+#        if: inputs.GIT_REF != ''
+#        with:
+#          ref: ${{ inputs.GIT_REF }}
 
       - uses: actions/checkout@v3
         with:
