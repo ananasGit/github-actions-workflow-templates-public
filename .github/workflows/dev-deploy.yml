@@ -88,14 +88,14 @@ jobs:
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
-        if: inputs.SONARQUBE_PROJECT_KEY != ''
+        if: inputs.SONARQUBE_PROJECT_KEY != ""
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
 
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@master
-        if: inputs.SONARQUBE_PROJECT_KEY != ''
+        if: inputs.SONARQUBE_PROJECT_KEY != ""
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
@@ -104,7 +104,7 @@ jobs:
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: | 
-          inputs.PUBLISH_UNIT_TEST_RESULTS && always()
+          inputs.PUBLISH_UNIT_TEST_RESULTS
         with:
           files: build/test-results/**/*.xml
 
@@ -136,6 +136,13 @@ jobs:
     needs: build
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
