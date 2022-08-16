@@ -75,6 +75,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: check-ecr
     steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
