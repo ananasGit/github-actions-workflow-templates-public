@@ -119,8 +119,8 @@ jobs:
         id: pull-image
         env:
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
-          ECR_REPOSITORY: ${{ input.ECR_REPOSITORY }}
-          IMAGE_TAG_DEV: ${{ input.BUILT_BRANCH }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG_DEV: ${{ inputs.BUILT_BRANCH }}
         run: |
           # Pull image from ecr dev
           $GITHUB_WORKSPACE/workflow-scripts/stage/pull-image-ecr-dev.sh
@@ -141,8 +141,8 @@ jobs:
         env:
           ECR_REGISTRY_PROD: ${{ steps.login-ecr-prod.outputs.registry }}
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
-          ECR_REPOSITORY: ${{ input.ECR_REPOSITORY }}
-          IMAGE_TAG_DEV: ${{ input.BUILT_BRANCH }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG_DEV: ${{ inputs.BUILT_BRANCH }}
         run: |
           # Tag and push image to prod ECR
           # Pull image from ecr dev
