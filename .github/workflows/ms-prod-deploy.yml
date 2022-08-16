@@ -65,7 +65,7 @@ jobs:
       - name: Check ECR tag
         env:
           BUILT_BRANCH: ${{ inputs.BUILT_BRANCH }}
-          ECR_REPOSITORY: ${{ steps.login-ecr-prod.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
         shell: bash
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/prod/check-ecr-tag.sh
