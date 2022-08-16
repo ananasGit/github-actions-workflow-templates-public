@@ -97,6 +97,13 @@ jobs:
     needs: deploy
     steps:
 
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
       - name: Configure AWS credentials DEV
         uses: aws-actions/configure-aws-credentials@v1
         with:
