@@ -25,10 +25,10 @@ on:
       AWS_REGION:
         description: aws region
         required: true
-      AWS_ACCESS_KEY_ID:
+      AWS_ACCESS_KEY_ID_PROD:
         description: aws access key
         required: true
-      AWS_SECRET_ACCESS_KEY:
+      AWS_SECRET_ACCESS_KEY_PROD:
         description: aws secret key
         required: true
       CHECKOUT_TOKEN:
