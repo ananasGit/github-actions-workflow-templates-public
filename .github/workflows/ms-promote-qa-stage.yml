@@ -13,10 +13,6 @@ on:
         type: string
         description: argo cd repo
         required: false
-      ARGO_CD_REPO_BRANCH:
-        type: string
-        description: argo cd repo branch
-        required: false
       ARGO_CD_FILE_TO_UPDATE:
         type: string
         description: argo cd file to update
