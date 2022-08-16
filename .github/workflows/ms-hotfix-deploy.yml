@@ -160,11 +160,6 @@ jobs:
           path: ${{ inputs.ARGO_CD_CHECKOUT_FOLDER }}
           ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
 
-      - name: Extract worskpace path name
-        shell: bash
-        run: echo "##[set-output name=directory;]$(echo $GITHUB_WORKSPACE)"
-        id: extract_directory
-
       - name: Create local changes
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/hotfix/create-local-changes.sh
