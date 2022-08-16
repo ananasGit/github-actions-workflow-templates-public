@@ -1,0 +1,112 @@
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        type: string
+        description: ecr repository
+        required: true
+      BUILT_BRANCH:
+        type: string
+        description: built branch
+        required: true
+      ARGO_CD_REPO:
+        type: string
+        description: argo cd repo
+        required: false
+      ARGO_CD_REPO_BRANCH:
+        type: string
+        description: argo cd repo branch
+        required: false
+      ARGO_CD_FILE_TO_UPDATE:
+        type: string
+        description: argo cd file to update
+        required: false
+    secrets:
+      AWS_REGION:
+        description: aws region
+        required: true
+      AWS_ACCESS_KEY_ID:
+        description: aws access key
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: aws secret key
+        required: true
+      CHECKOUT_TOKEN:
+        description: checkout token
+        required: true
+      
+name:  PROD - deploy
+
+jobs:
+  check-ecr:
+    name:  Check Image exists on ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
+      - name: Configure AWS credentials Prod
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR prod
+        id: login-ecr-prod
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Check ECR tag
+        env:
+          BUILT_BRANCH: ${{ inputs.BUILT_BRANCH }}
+          ECR_REPOSITORY: ${{ steps.login-ecr-prod.outputs.registry }}
+        shell: bash
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/prod/check-ecr-tag.sh
+      
+  deploy:
+    name: ArgoCD Deploy
+    runs-on: ubuntu-latest
+    needs: check-ecr
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Add date when deployed
+        run: mkdir $GITHUB_WORKSPACE/${{ env.ARGO_CD_CHECKOUT_FOLDER }}
+        shell: bash
+
+      - name: Checkout ArgoCD
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.ARGO_CD_REPO }}
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: argocd
+          ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
+
+      - name: Create local changes
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/prod/create-local-changes.sh
+
+      - name: Commit files
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/common/commit-files.sh
