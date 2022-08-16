@@ -122,7 +122,6 @@ jobs:
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.BUILT_BRANCH }}
         run: |
-          # Pull image from ecr dev
           $GITHUB_WORKSPACE/workflow-scripts/stage/pull-image-ecr-dev.sh
 
       - name: Configure AWS credentials Prod
@@ -144,6 +143,4 @@ jobs:
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.BUILT_BRANCH }}
         run: |
-          # Tag and push image to prod ECR
-          # Pull image from ecr dev
           $GITHUB_WORKSPACE/workflow-scripts/stage/push-image-to-prod-ecr.sh

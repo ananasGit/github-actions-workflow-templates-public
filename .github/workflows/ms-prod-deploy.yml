@@ -86,10 +86,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Add date when deployed
-        run: mkdir $GITHUB_WORKSPACE/${{ env.ARGO_CD_CHECKOUT_FOLDER }}
-        shell: bash
-
       - name: Checkout ArgoCD
         uses: actions/checkout@v3
         with:
