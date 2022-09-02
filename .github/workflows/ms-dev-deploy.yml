@@ -41,6 +41,10 @@ on:
         type: string
         description: sonarqube project name
         required: false
+      SONARQUBE_QUALITY_GATE_CHECK:
+        type: string
+        description: SonarQube Quality Gate check
+        required: false
       PUBLISH_UNIT_TEST_RESULTS:
         type: string
         description: sonarqube project name
@@ -99,7 +103,9 @@ jobs:
 
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@master
-        if: inputs.SONARQUBE_PROJECT_KEY != ''
+        if: |
+          inputs.SONARQUBE_PROJECT_KEY != '' &&
+          inputs.SONARQUBE_QUALITY_GATE_CHECK == 'true'
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
