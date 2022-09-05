@@ -63,6 +63,9 @@ on:
       CHECKOUT_TOKEN:
         description: checkout token
         required: true
+      SONARQUBE_TOKEN:
+        description: SonarQube token
+        required: false
 
 name: DEV - deploy
 
