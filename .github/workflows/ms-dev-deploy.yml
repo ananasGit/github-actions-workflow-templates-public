@@ -66,6 +66,9 @@ on:
       SONARQUBE_TOKEN:
         description: SonarQube token
         required: false
+      SONARQUBE_HOST:
+        description: SonarQube host
+        required: false
 
 name: DEV - deploy
 
