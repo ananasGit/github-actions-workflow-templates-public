@@ -75,7 +75,7 @@ jobs:
           fetch-depth: 1
 
       - uses: actions/checkout@v3
-          with:
+        with:
           repository: 'ananasGit/github-actions-workflow-templates-scripts'
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: 'workflow-scripts'
