@@ -60,7 +60,7 @@ jobs:
       - name: Verify CODE FREEZE
         shell: bash
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/verify-code-freeze.sh
+          $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/promote-qa-stage/verify-code-freeze.sh
 
   get_commit_hash:
     name: Checkout QA to get commit hash on QA env
