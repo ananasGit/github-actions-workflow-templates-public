@@ -24,15 +24,17 @@ on:
         type: string
         required: true
       IMAGE_NAME_TAG:
+        type: string
         description: image name tag
         required: true
       ARGO_ORIGIN_CHECKOUT_FOLDER:
+        type: string
         description: argo folder checkout
         required: true
       ARGO_DEST_CHECKOUT_FOLDER:
+        type: string
         description: argo folder dest
         required: true
-
 
     secrets:
       AWS_REGION:
@@ -48,10 +50,7 @@ on:
         description: checkout token
         required: true
 
-
-
 name: Promote QA to STAGE env
-
 
 jobs:
   test_code_freeze:
