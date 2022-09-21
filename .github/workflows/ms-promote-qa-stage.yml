@@ -87,7 +87,7 @@ jobs:
           fetch-depth: 1
 
       - name: Checkout argoCD repo-qa
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ inputs.ARGO_CD_REPO }}
           token: ${{ secrets.CHECKOUT_TOKEN }}
