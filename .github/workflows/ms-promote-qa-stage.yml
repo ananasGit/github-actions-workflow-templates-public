@@ -142,7 +142,7 @@ jobs:
       - name: checkout MS Repo
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.ANANASDEVOPS_COMMIT_TOKEN }}
+          token: ${{ secrets.CHECKOUT_TOKEN }}
           fetch-depth: 0
 
       - name: Tag ms repo origin
