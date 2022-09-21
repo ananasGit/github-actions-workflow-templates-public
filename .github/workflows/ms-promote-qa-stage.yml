@@ -162,7 +162,7 @@ jobs:
         id: pull-image
         env:
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.ECR_REPO }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.IMAGE_NAME_TAG }}
         run: |
           # Pull image from ecr dev
@@ -185,7 +185,7 @@ jobs:
         env:
           ECR_REGISTRY_PROD: ${{ steps.login-ecr-prod.outputs.registry }}
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.ECR_REPO }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.IMAGE_NAME_TAG }}
         run: |
           # Tag and push image to prod ECR
