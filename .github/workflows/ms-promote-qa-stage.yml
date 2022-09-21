@@ -87,7 +87,7 @@ jobs:
           fetch-depth: 1
 
       - name: Checkout argoCD repo-qa
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ inputs.ARGO_CD_REPO }}
           token: ${{ secrets.CHECKOUT_TOKEN }}
@@ -105,17 +105,23 @@ jobs:
         run: |
           echo ${{ steps.commit_hash.outputs.commit_hash }}
 
-      - name: Checkout argoCD repo-stage
-        uses: actions/checkout@v2
+      - name: Checkout ArgoCD
+        uses: actions/checkout@v3
         with:
           repository: ${{ inputs.ARGO_CD_REPO }}
           token: ${{ secrets.CHECKOUT_TOKEN }}
-          path: ${{ inputs.ARGO_DEST_CHECKOUT_FOLDER }}
-          ref: ${{ inputs.PROMOTE_DESTINATION }}
+          path: argocd
+          ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
 
-      - name: Create local changes for stage manifest
+      - name: Create local changes
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/create-local-changes.sh
+          $GITHUB_WORKSPACE/workflow-scripts/dev/create-local-changes.sh
+
 
       - name: Commit files
         run: |
@@ -123,10 +129,12 @@ jobs:
           
 
       - name: checkout MS Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          token: ${{ secrets.ANANASDEVOPS_COMMIT_TOKEN }}
-          fetch-depth: 0
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
 
       - name: Tag ms repo origin
         run: |
@@ -154,7 +162,7 @@ jobs:
         id: pull-image
         env:
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.ECR_REPO }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.IMAGE_NAME_TAG }}
         run: |
           # Pull image from ecr dev
@@ -177,7 +185,7 @@ jobs:
         env:
           ECR_REGISTRY_PROD: ${{ steps.login-ecr-prod.outputs.registry }}
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.ECR_REPO }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.IMAGE_NAME_TAG }}
         run: |
           # Tag and push image to prod ECR
