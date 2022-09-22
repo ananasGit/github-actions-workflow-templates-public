@@ -23,7 +23,7 @@ on:
       PROMOTE_DESTINATION:
         type: string
         required: true
-      IMAGE_NAME_TAG:
+      IMAGE_TAG:
         type: string
         description: image name tag
         required: true
