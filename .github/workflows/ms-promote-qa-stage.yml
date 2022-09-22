@@ -111,7 +111,7 @@ jobs:
           repository: ${{ inputs.ARGO_CD_REPO }}
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: argocd
-          ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
+          ref: ${{ inputs.PROMOTE_DESTINATION}}
 
       - name: Configure AWS credentials DEV
         uses: aws-actions/configure-aws-credentials@v1
