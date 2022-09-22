@@ -36,14 +36,6 @@ on:
         type: string
         description: argo cd file to update
         required: false
-      SONARQUBE_PROJECT_KEY:
-        type: string
-        description: sonarqube project key
-        required: false
-      SONARQUBE_PROJECT_NAME:
-        type: string
-        description: sonarqube project name
-        required: false
       PUBLISH_UNIT_TEST_RESULTS:
         type: string
         description: sonarqube project name
