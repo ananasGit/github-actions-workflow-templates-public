@@ -131,7 +131,7 @@ jobs:
           IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
           ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/create-local-changes.sh
+          $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/create-local-changes.sh
 
 
       - name: Commit files
