@@ -128,7 +128,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          IMAGE_NAME_TAG: ${{ inputs.BUILT_BRANCH }}
           ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/create-local-changes.sh
