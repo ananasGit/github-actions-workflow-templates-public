@@ -148,11 +148,9 @@ jobs:
       - name: Scan Docker image
         id: docker-scan
         uses: alexjurkiewicz/ecr-scan-image@v1.7.0
-        env:
-          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
         with:
           repository: ${{ inputs.ECR_REPOSITORY }}
-          tag: ${IMAGE_TAG}-${GITHUB_SHA::7}
+          tag: '${{ inputs.BUILT_BRANCH }}-${GITHUB_SHA::7}'
 
       - name: Check vulnerabilities
         run: echo "${{ steps.docker-scan.outputs.total }} total vulnerabilities."
