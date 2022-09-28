@@ -145,12 +145,17 @@ jobs:
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/build-tag-push-docker-image-to-aws-ecr.sh
 
+      - name: Short sha
+        id: short_sha
+        run: echo "::set-output name=short_sha::$(echo ${GITHUB_SHA::7})"
+
       - name: Scan Docker image
         id: docker-scan
         uses: alexjurkiewicz/ecr-scan-image@v1.7.0
         with:
           repository: ${{ inputs.ECR_REPOSITORY }}
-          tag: ${GITHUB_SHA:0:7}
+          tag: ${{ inputs.BUILT_BRANCH }}-${{ steps.short_sha.outputs.short_sha }}
+          fail_threshold: high
 
       - name: Check vulnerabilities
         run: echo "${{ steps.docker-scan.outputs.total }} total vulnerabilities."
