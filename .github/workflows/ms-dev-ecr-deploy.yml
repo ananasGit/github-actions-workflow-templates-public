@@ -147,7 +147,8 @@ jobs:
 
       - name: Short sha
         id: short_sha
-        run: echo "::set-output name=short_sha::$(echo ${GITHUB_SHA::7})"
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/create-short-sha.sh
 
       - name: Scan Docker image
         id: docker-scan
@@ -158,7 +159,10 @@ jobs:
           fail_threshold: high
 
       - name: Check vulnerabilities
-        run: echo "${{ steps.docker-scan.outputs.total }} total vulnerabilities."
+        env:
+          VULNERABILITIES: ${{ steps.docker-scan.outputs.total }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/check-vulnerabilities.sh
 
   deploy:
     name: ArgoCD Deploy
