@@ -54,8 +54,6 @@ on:
       CHECKOUT_TOKEN:
         description: checkout token
         required: true
-      INPUT_REF: $(echo ${{ inputs.GIT-REF }} | cut -c1-7)
-
 
 name: Hotfix build and deploy to stage env
 
@@ -179,6 +177,11 @@ jobs:
         id: login-ecr-dev
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Short sha
+        id: short_sha
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/create-short-sha.sh
+
       - name: Pull image from Amazon ECR dev
         id: pull-image
         env:
@@ -187,7 +190,7 @@ jobs:
           IMAGE_TAG_DEV: ${{ inputs.BUILT_BRANCH }}
         run: |
           # Pull image from ecr dev
-          docker pull $ECR_REGISTRY_DEV/$ECR_REPOSITORY:$IMAGE_TAG_DEV-${{inputs.INPUT_REF}}
+          docker pull $ECR_REGISTRY_DEV/$ECR_REPOSITORY:$IMAGE_TAG_DEV-${{ steps.short_sha.outputs.short_sha }}
 
       - name: Configure AWS credentials Prod
         uses: aws-actions/configure-aws-credentials@v1
