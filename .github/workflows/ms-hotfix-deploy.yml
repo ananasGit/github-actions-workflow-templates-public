@@ -2,6 +2,7 @@ on:
   workflow_call:
     inputs:
       GIT-REF:
+        type: string
         description: Git Ref (Optional)
         required: false
       ECR_REPOSITORY:
