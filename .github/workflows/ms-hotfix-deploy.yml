@@ -1,5 +1,5 @@
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       GIT-REF:
         description: Git Ref (Optional)
