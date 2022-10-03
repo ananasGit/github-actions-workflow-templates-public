@@ -156,7 +156,7 @@ jobs:
         with:
           repository: ${{ inputs.ECR_REPOSITORY }}
           tag: ${{ inputs.BUILT_BRANCH }}-${{ steps.short_sha.outputs.short_sha }}
-          fail_threshold: high
+          fail_threshold: critical
 
   deploy:
     name: ArgoCD Deploy
