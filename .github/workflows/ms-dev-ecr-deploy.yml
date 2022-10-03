@@ -11,15 +11,15 @@ on:
         required: true
       DOCKER_FILE:
         type: string
-        description: built branch
+        description: docker file
         required: true
       JAVA_VERSION:
         type: string
-        description: argo cd repo
+        description: java version
         required: true
       JAVA_VERSION_DISTRIBUTION:
         type: string
-        description: argo cd repo branch
+        description: java version distribution
         required: true
       ARGO_CD_REPO:
         type: string
@@ -35,11 +35,11 @@ on:
         required: false
       SONARQUBE_PROJECT_KEY:
         type: string
-        description: sonarqube project key
+        description: SonarQube project key
         required: false
       SONARQUBE_PROJECT_NAME:
         type: string
-        description: sonarqube project name
+        description: SonarQube project name
         required: false
       SONARQUBE_QUALITY_GATE_CHECK:
         type: string
@@ -47,7 +47,7 @@ on:
         required: false
       PUBLISH_UNIT_TEST_RESULTS:
         type: string
-        description: sonarqube project name
+        description: SonarQube project name
         required: false
         default: false
     secrets:
