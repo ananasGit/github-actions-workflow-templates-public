@@ -21,10 +21,7 @@ on:
         type: string
         description: argo cd file to update
         required: false
-      ARGO_CD_CHECKOUT_FOLDER:
-        type: string
-        description: argocd checkout folder
-        required: true
+
     secrets:
       AWS_REGION:
         description: aws region
@@ -71,7 +68,7 @@ jobs:
         with:
           repository: ${{ inputs.ARGO_CD_REPO }}
           token: ${{ secrets.CHECKOUT_TOKEN }}
-          path: ${{ inputs.ARGO_CD_CHECKOUT_FOLDER }}
+          path: argocd
           ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
 
       - name: Create local changes
