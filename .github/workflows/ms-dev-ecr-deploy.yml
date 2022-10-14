@@ -204,25 +204,25 @@ jobs:
           tag: ${{ inputs.BUILT_BRANCH }}-${{ steps.short_sha.outputs.short_sha }}
           fail_threshold: high
 
-  upload:
-    #needs: Build-Docker-Image
-    #runs-on: [self-hosted, dev]
-    runs-on: ubuntu-latest
-    name: Upload s3
-    steps:
-      - name: Checkout new branch
-        uses: actions/checkout@v2
-        with:
-          ref: gh-pages
-      - name: Login upload
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY}}
-          aws_bucket: 'allure.svc.sandbox.ananastest.com'
-          source_dir: '.'
-          destination_dir: 'iamqaautomation'
-          ##### END FOR AQA TESTING ####
+#  upload:
+#    #needs: Build-Docker-Image
+#    #runs-on: [self-hosted, dev]
+#    runs-on: ubuntu-latest
+#    name: Upload s3
+#    steps:
+#      - name: Checkout new branch
+#        uses: actions/checkout@v2
+#        with:
+#          ref: gh-pages
+#      - name: Login upload
+#        uses: shallwefootball/s3-upload-action@master
+#        with:
+#          aws_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+#          aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY}}
+#          aws_bucket: 'allure.svc.sandbox.ananastest.com'
+#          source_dir: '.'
+#          destination_dir: 'iamqaautomation'
+#          ##### END FOR AQA TESTING ####
 
   deploy:
     name: ArgoCD Deploy
