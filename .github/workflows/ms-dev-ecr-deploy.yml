@@ -134,8 +134,8 @@ jobs:
       ##### START FOR AQA TESTING ####
       - name: Install Google Chrome
         run: |
-          chmod +x ./scripts/installChromeF.sh
-          ./scripts/installChromeF.sh
+          chmod +x ./github-actions-workflow-templates-scripts/dev/installChromeF.sh
+          ./github-actions-workflow-templates-scripts/dev/installChromeF.sh
           chmod +x ./gradlew
       - name: Build with Gradle
         env:
