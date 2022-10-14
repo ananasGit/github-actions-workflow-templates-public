@@ -205,7 +205,7 @@ jobs:
           fail_threshold: high
 
   upload:
-    needs: Build-Docker-Image
+    needs: build
     #runs-on: [self-hosted, dev]
     runs-on: ubuntu-latest
     name: Upload s3
