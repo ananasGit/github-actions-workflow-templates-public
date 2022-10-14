@@ -131,6 +131,52 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      ##### START FOR AQA TESTING ####
+      - name: Install Google Chrome
+        run: |
+          chmod +x ./scripts/installChromeF.sh
+          ./scripts/installChromeF.sh
+          chmod +x ./gradlew
+      - name: Build with Gradle
+        env:
+          QA_ENV: ${{ github.event.inputs.qa_env || 'qa' }}
+          QA_TAG: ${{ github.event.inputs.qa_tag || '@night' }}
+          TA_API_SECRET: ${{ secrets.TESTRAIL_API_SECRET }}
+          TA_API_USERNAME: ${{ secrets.TESTRAIL_API_USERNAME }}
+        #          DB_USER: ${{ secrets.AWS_RDS_QA_AUTOMATION_USERNAME }}
+        #          DB_PASS: ${{ secrets.AWS_RDS_QA_AUTOMATION_PASSWORD }}
+        run: |
+          ./gradlew cucumber -Denv=$QA_ENV -Ddriver=headlessChrome -Dcucumber.filter.tags="$QA_TAG"
+        continue-on-error: true
+
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        #        if: ${{ github.event.inputs.qa_tag == '@smoke' }}
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Allure Report action from marketplace
+        uses: ananasGit/allure@master
+
+        #        if: ${{ github.event.inputs.qa_tag == '@smoke' }}
+        id: allure-report
+        with:
+          allure_results: build/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Deploy report to Github Pages
+        #        if: ${{ github.event.inputs.qa_tag == '@smoke' }}
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
+
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
@@ -158,11 +204,25 @@ jobs:
           tag: ${{ inputs.BUILT_BRANCH }}-${{ steps.short_sha.outputs.short_sha }}
           fail_threshold: high
 
-      - name: Check vulnerabilities
-        env:
-          VULNERABILITIES: ${{ steps.docker-scan.outputs.total }}
-        run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/check-vulnerabilities.sh
+  upload:
+    needs: qamanualtest
+    #runs-on: [self-hosted, dev]
+    runs-on: ubuntu-latest
+    name: Upload s3
+    steps:
+      - name: Checkout new branch
+        uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+      - name: Login upload
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY}}
+          aws_bucket: 'allure.svc.sandbox.ananastest.com'
+          source_dir: '.'
+          destination_dir: 'iamqaautomation'
+          ##### END FOR AQA TESTING ####
 
   deploy:
     name: ArgoCD Deploy
