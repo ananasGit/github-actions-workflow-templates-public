@@ -156,7 +156,7 @@ jobs:
         with:
           repository: 'ananasGit/iam-qa-automation'
           token: ${{ secrets.CHECKOUT_TOKEN }}
-          path: 'build.gradle'
+          path: 'iam-qa-automation/build.gradle'
           fetch-depth: 1
 
       - name: Install Google Chrome
