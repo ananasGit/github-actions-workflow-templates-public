@@ -158,8 +158,8 @@ jobs:
           chmod +x ./gradlew
       - name: Build with Gradle
         env:
-          DEV_ENV: ${{ input.DEV_ENV }}
-          DEV_TAG: ${{ input.DEV_TAG }}
+          DEV_ENV: ${{ DEV_ENV }}
+          DEV_TAG: ${{ DEV_TAG }}
           TA_API_SECRET: ${{ secrets.TESTRAIL_API_SECRET }}
           TA_API_USERNAME: ${{ secrets.TESTRAIL_API_USERNAME }}
         run: |
