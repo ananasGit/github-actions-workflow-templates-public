@@ -74,6 +74,12 @@ on:
       SONARQUBE_HOST:
         description: SonarQube host
         required: false
+      AWS_ACCESS_KEY_ALLURE_QA_TEST:
+        description: aws access key
+        required: true
+      AWS_SECRET_KEY_ALLURE_QA_TEST:
+        description: aws secret key
+        required: true
 
 name: DEV - deploy
 jobs:
