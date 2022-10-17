@@ -232,9 +232,9 @@ jobs:
           ##### END FOR AQA TESTING ####
 
   deploy:
+    needs: upload
     name: ArgoCD Deploy
     runs-on: ubuntu-latest
-    needs: build
 
     steps:
       - uses: actions/checkout@v3
