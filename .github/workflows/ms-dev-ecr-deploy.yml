@@ -216,7 +216,7 @@ jobs:
       - name: Login upload
         uses: shallwefootball/s3-upload-action@master
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ALLURE_QA_TEST }}
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ALLURE_QA_TEST }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY_ALLURE_QA_TEST }}
           aws_bucket: 'allure.svc.sandbox.ananastest.com'
           source_dir: '.'
