@@ -148,12 +148,12 @@ jobs:
           chmod +x ./gradlew
       - name: Build with Gradle
         env:
-          QA_ENV: ${{ github.event.inputs.qa_env || 'qa' }}
-          QA_TAG: ${{ github.event.inputs.qa_tag || '@pipeline' }}
+          DEV_ENV: ${{ github.event.inputs.dev_env || 'dev' }}
+          DEV_TAG: ${{ github.event.inputs.dev_tag || '@pipeline' }}
           TA_API_SECRET: ${{ secrets.TESTRAIL_API_SECRET }}
           TA_API_USERNAME: ${{ secrets.TESTRAIL_API_USERNAME }}
         run: |
-          ./gradlew cucumber -Denv=$QA_ENV -Ddriver=headlessChrome -Dcucumber.filter.tags="$QA_TAG"
+          ./gradlew cucumber -Denv=$DEV_ENV -Ddriver=headlessChrome -Dcucumber.filter.tags="$DEV_TAG"
         continue-on-error: true
 
       - name: Get Allure history
