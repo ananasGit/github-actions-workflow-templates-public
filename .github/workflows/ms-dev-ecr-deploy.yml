@@ -71,8 +71,8 @@ on:
         required: false
 
 name: DEV - deploy
-#env:
-#  GITHUB_PAGES_WEBSITE_URL: 'https://allure.svc.sandbox.ananastest.com/iamdevautomation'
+env:
+  GITHUB_PAGES_WEBSITE_URL: 'https://allure.svc.sandbox.ananastest.com/iamdevautomation'
 jobs:
   build:
     name: Build-Docker-Image
