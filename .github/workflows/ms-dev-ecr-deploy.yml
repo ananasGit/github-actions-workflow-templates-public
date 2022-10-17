@@ -50,6 +50,11 @@ on:
         description: SonarQube project name
         required: false
         default: false
+      GITHUB_PAGES_WEBSITE_URL:
+        type: string
+        description: Github url s3
+        required: true
+        default: false
     secrets:
       AWS_REGION:
         description: aws region
@@ -71,8 +76,6 @@ on:
         required: false
 
 name: DEV - deploy
-env:
-  GITHUB_PAGES_WEBSITE_URL: 'https://allure.svc.sandbox.ananastest.com/iamdevautomation'
 jobs:
   build:
     name: Build-Docker-Image
