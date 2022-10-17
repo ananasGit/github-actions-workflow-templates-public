@@ -69,12 +69,14 @@ on:
       SONARQUBE_HOST:
         description: SonarQube host
         required: false
-      AWS_ACCESS_KEY_ALLURE_QA_TEST:
-        description: access to s3 bucket
+      qa_env:
+        description: 'QA env'
         required: true
-      AWS_SECRET_KEY_ALLURE_QA_TEST:
-        description: access to s3 bucket
+        default: 'dev'
+      qa_tag:
+        description: 'QA tag'
         required: true
+        default: '@sunnyDay'
 
 name: DEV - deploy
 env:
@@ -145,12 +147,12 @@ jobs:
           chmod +x ./gradlew
       - name: Build with Gradle
         env:
-          MASTER_ENV: ${{ github.event.inputs.master_env || 'master' }}
-          MASTER_TAG: ${{ github.event.inputs.master_tag || '@pipeline' }}
+          QA_ENV: ${{ github.event.inputs.qa_env || 'master' }}
+          QA_TAG: ${{ github.event.inputs.qa_tag || '@pipeline' }}
           TA_API_SECRET: ${{ secrets.TESTRAIL_API_SECRET }}
           TA_API_USERNAME: ${{ secrets.TESTRAIL_API_USERNAME }}
         run: |
-          ./gradlew cucumber -Denv=$MASTER_ENV -Ddriver=headlessChrome -Dcucumber.filter.tags="$MASTER_TAG"
+          ./gradlew cucumber -Denv=$QA_ENV -Ddriver=headlessChrome -Dcucumber.filter.tags="$QA_TAG"
         continue-on-error: true
 
       - name: Get Allure history
