@@ -41,5 +41,5 @@ jobs:
       - name: Trigger Argo Workflow
         uses: distributhor/workflow-webhook@v2
         env:
-          webhook_url: ${{ inputs ARGO_WEBHOOK_URL }}${{ github.event.repository.name }}
+          webhook_url: ${{ inputs.ARGO_WEBHOOK_URL }}${{ github.event.repository.name }}
           webhook_secret: ${{ secrets.ARGO_WEBHOOK_SECRET }}
