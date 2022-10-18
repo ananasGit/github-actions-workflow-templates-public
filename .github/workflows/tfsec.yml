@@ -17,7 +17,6 @@ on:
         required: true
     secrets:
       ARGO_WEBHOOK_SECRET:
-        type: string
         description: Webhook secret for ARGO_WEBHOOK_URL
         required: true
 
