@@ -1,0 +1,45 @@
+on:
+  workflow_call:
+    inputs:
+      SARIF_FILE:
+        type: string
+        description: TfSec output sarif file
+        required: false
+        default: tfsec.sarif
+      TF_VARS_FILE:
+        type: string
+        description: Path for tfvars file
+        required: false
+        default: variables.auto.tfvars
+      ARGO_WEBHOOK_URL:
+        type: string
+        description: Webhook url for triggering of Argo Workflow
+        required: true
+    secrets:
+      ARGO_WEBHOOK_SECRET:
+        type: string
+        description: Webhook secret for ARGO_WEBHOOK_URL
+        required: true
+
+name: TfSec - Scan
+
+jobs:
+  tfsec:
+    name: TfSec Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: TfSec Scan
+        uses: tfsec/tfsec-sarif-action@v0.1.3
+        with:
+          sarif_file: ${{ inputs.SARIF_FILE }}
+          tfvars_file: ${{ inputs.TF_VARS_FILE }}
+
+      - name: Trigger Argo Workflow
+        uses: distributhor/workflow-webhook@v2
+        env:
+          webhook_url: ${{ inputs ARGO_WEBHOOK_URL }}${{ github.event.repository.name }}
+          webhook_secret: ${{ secrets.ARGO_WEBHOOK_SECRET }}
