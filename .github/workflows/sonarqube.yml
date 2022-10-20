@@ -67,5 +67,5 @@ jobs:
       - name: Trigger
         uses: distributhor/workflow-webhook@v2
         env:
-          webhook_url: ${{ inputs.webhook_url }}/${{ github.event.repository.name }}
+          webhook_url: ${{ inputs.webhook_url }}${{ github.event.repository.name }}
           webhook_secret: ${{ secrets.webhook_secret }}
