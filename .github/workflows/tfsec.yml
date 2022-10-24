@@ -4,7 +4,7 @@ on:
       argocd-event:
         type: string
         description: ArgoCD Event enabled
-        required: true
+        required: false
       webhook_url:
         type: string
         description: URL for webhook trigger
