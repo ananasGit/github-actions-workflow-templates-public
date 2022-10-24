@@ -46,7 +46,7 @@ jobs:
   argowf-trigger:
     name: Argo Workflow Trigger
     runs-on: ubuntu-latest
-    if: ${{ inputs.argocd-event == "true" }}
+    if: ${{ inputs.argocd-event == 'enabled' }}
     needs: sonar
     steps:
       - name: Trigger
