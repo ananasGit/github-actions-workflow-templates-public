@@ -1,44 +1,56 @@
 on:
   workflow_call:
     inputs:
-      SARIF_FILE:
+      argocd-event:
         type: string
-        description: TfSec output sarif file
-        required: false
-        default: tfsec.sarif
-      TF_VARS_FILE:
-        type: string
-        description: Path for tfvars file
-        required: false
-        default: variables.auto.tfvars
-      ARGO_WEBHOOK_URL:
-        type: string
-        description: Webhook url for triggering of Argo Workflow
+        description: ArgoCD Event enabled
         required: true
+      webhook_url:
+        type: string
+        description: URL for webhook trigger
+        required: false
     secrets:
-      ARGO_WEBHOOK_SECRET:
-        description: Webhook secret for ARGO_WEBHOOK_URL
+      sonar_host_url:
+        description: SonarQube host url
         required: true
+      sonar_token:
+        description: Token for authorization with SonarQube
+        required: true
+      webhook_secret:
+        description: Secret for webhook trigger
+        required: false
 
-name: TfSec - Scan
+name: SonarQube Scan
 
 jobs:
-  tfsec:
-    name: TfSec Report
+  sonar:
+    name: SonarQube check
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: TfSec Scan
-        uses: tfsec/tfsec-sarif-action@v0.1.3
-        with:
-          sarif_file: ${{ inputs.SARIF_FILE }}
-          tfvars_file: ${{ inputs.TF_VARS_FILE }}
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar_token }}
+          SONAR_HOST_URL: ${{ secrets.sonar_host_url }}
 
-      - name: Trigger Argo Workflow
+      - name: SonarQube Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar_token }}
+          SONAR_HOST_URL: ${{ secrets.sonar_host_url }}
+
+  argowf-trigger:
+    name: Argo Workflow Trigger
+    runs-on: ubuntu-latest
+    if: ${{ inputs.argocd-event == "true" }}
+    needs: sonar
+    steps:
+      - name: Trigger
         uses: distributhor/workflow-webhook@v2
         env:
-          webhook_url: ${{ inputs.ARGO_WEBHOOK_URL }}${{ github.event.repository.name }}
-          webhook_secret: ${{ secrets.ARGO_WEBHOOK_SECRET }}
+          webhook_url: ${{ inputs.webhook_url }}${{ github.event.repository.name }}
+          webhook_secret: ${{ secrets.webhook_secret }}
