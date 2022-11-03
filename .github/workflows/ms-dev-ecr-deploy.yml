@@ -250,7 +250,7 @@ jobs:
           ##### END FOR AQA TESTING ####
 
   deploy:
-    needs: upload
+#    needs: upload
     name: ArgoCD Deploy
     runs-on: ubuntu-latest
 
