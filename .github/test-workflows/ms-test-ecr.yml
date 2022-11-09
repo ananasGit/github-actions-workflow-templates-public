@@ -1,0 +1,107 @@
+on:
+  workflow_run:
+    workflows: ["Dev - deploy"]
+    types:
+      - completed
+
+name: ECR - test
+jobs:
+  build:
+    name: Test-ECR-Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/iam-qa-automation'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'iam-qa-automation'
+          fetch-depth: 1
+
+      - name: Install Google Chrome
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/installChromeF.sh
+          chmod +x ./gradlew
+      - name: Build with Gradle
+        env:
+          DEV_ENV: ${{ inputs.DEV_ENV }}
+          DEV_TAG: ${{ inputs.DEV_TAG }}
+          TA_API_SECRET: ${{ secrets.TESTRAIL_API_SECRET }}
+          TA_API_USERNAME: ${{ secrets.TESTRAIL_API_USERNAME }}
+        run: |
+          cd iam-qa-automation
+          ./gradlew cucumber -Denv=$DEV_ENV -Ddriver=headlessChrome -Dcucumber.filter.tags="$DEV_TAG"
+        continue-on-error: true
+
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        #        if: ${{ github.event.inputs.qa_tag == '@smoke' }}
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Allure Report action from marketplace
+        uses: ananasGit/allure@master
+
+        #        if: ${{ github.event.inputs.qa_tag == '@smoke' }}
+        id: allure-report
+        with:
+          allure_results: iam-qa-automation/build/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Deploy report to Github Pages
+        #        if: ${{ github.event.inputs.qa_tag == '@smoke' }}
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          DOCKER_FILE: ${{ inputs.DOCKER_FILE }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/build-tag-push-docker-image-to-aws-ecr.sh
+
+      - name: Short sha
+        id: short_sha
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/create-short-sha.sh
+
+      - name: Scan Docker image
+        id: docker-scan
+        uses: alexjurkiewicz/ecr-scan-image@v1.7.0
+        with:
+          repository: ${{ inputs.ECR_REPOSITORY }}
+          tag: ${{ inputs.BUILT_BRANCH }}-${{ steps.short_sha.outputs.short_sha }}
+          fail_threshold: high
+
+  upload:
+   needs: build
+   runs-on: [ self-hosted, dev ]
+   #runs-on: ubuntu-latest
+   name: Upload s3
+   steps:
+     - name: Checkout new branch
+       uses: actions/checkout@v2
+       with:
+         ref: gh-pages
+     - name: Login upload
+       uses: shallwefootball/s3-upload-action@master
+       with:
+         aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ALLURE_QA_TEST }}
+         aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY_ALLURE_QA_TEST }}
+         aws_bucket: 'allure.svc.sandbox.ananastest.com'
+         source_dir: '.'
+         destination_dir: 'iamdevautomation'

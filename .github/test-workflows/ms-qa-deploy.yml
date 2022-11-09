@@ -1,0 +1,167 @@
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        type: string
+        description: ecr repository
+        required: true
+      BUILT_BRANCH:
+        type: string
+        description: built branch
+        required: true
+      ARGO_CD_REPO:
+        type: string
+        description: argo cd repo
+        required: false
+      ARGO_CD_REPO_BRANCH:
+        type: string
+        description: argo cd repo branch
+        required: false
+      ARGO_CD_FILE_TO_UPDATE:
+        type: string
+        description: argo cd file to update
+        required: false
+      GIT_REF:
+        type: string
+        description: Git ref for deploy
+        required: false
+      SKIP_TAG:
+        type: string
+        description: skip tag to stop automatically deploy
+        required: true
+    secrets:
+      AWS_REGION:
+        description: aws region
+        required: true
+      AWS_ACCESS_KEY_ID:
+        description: aws access key
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: aws secret key
+        required: true
+      CHECKOUT_TOKEN:
+        description: checkout token
+        required: true
+
+name: QA - deploy
+
+jobs:
+  test_code_freeze:
+    name: Verify Code freeze enabled
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
+      - name: Verify CODE FREEZE
+        shell: bash
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/verify-code-freeze.sh
+
+  validate_deploy:
+    name: Validate Tag for skipping deployment
+    runs-on: ubuntu-latest
+    needs: test_code_freeze
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
+      - name: Find Tag
+        id: tagger
+        uses: jimschubert/query-tag-action@v1
+        with:
+          include: ${{ inputs.SKIP_TAG }}
+          commit-ish: 'HEAD~'
+        continue-on-error: true
+
+      - name: Show Tag
+        id: display
+        env:
+          TAG: ${{ steps.tagger.outputs.tag }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/show-tag.sh
+
+      - name: Abort job on tag
+        env:
+          TAG: ${{ steps.tagger.outputs.tag }}
+          SKIP_TAG: ${{ inputs.SKIP_TAG }}
+          GIT_REF: ${{ inputs.GIT_REF }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/abort-job-on-tag.sh
+
+  deploy:
+    name: ArgoCD Deploy
+    runs-on: ubuntu-latest
+    needs: validate_deploy
+
+    steps:
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v3
+        if: inputs.GIT_REF == ''
+
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v3
+        if: inputs.GIT_REF != ''
+        with:
+          ref: ${{ inputs.GIT_REF }}
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Checkout argoCD repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.ARGO_CD_REPO }}
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: argocd
+          ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
+          fetch-depth: 1
+
+      - name: Create local changes
+        if: inputs.GIT_REF == ''
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/create-local-changes.sh
+
+      - name: Create local changes for custome git-ref
+        if: inputs.GIT_REF != ''
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
+          GIT_REF: ${{ inputs.GIT_REF }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/create-local-changes-with-git-ref.sh
+
+      - name: Commit files
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/commit-files.sh

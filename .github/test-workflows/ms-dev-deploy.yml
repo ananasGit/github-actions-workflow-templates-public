@@ -1,0 +1,210 @@
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        type: string
+        description: ecr repository
+        required: true
+      BUILT_BRANCH:
+        type: string
+        description: built branch
+        required: true
+      DOCKER_FILE:
+        type: string
+        description: built branch
+        required: true
+      JAVA_VERSION:
+        type: string
+        description: argo cd repo
+        required: true
+      JAVA_VERSION_DISTRIBUTION:
+        type: string
+        description: argo cd repo branch
+        required: true
+      ARGO_CD_REPO:
+        type: string
+        description: argo cd repo
+        required: false
+      ARGO_CD_REPO_BRANCH:
+        type: string
+        description: argo cd repo branch
+        required: false
+      ARGO_CD_FILE_TO_UPDATE:
+        type: string
+        description: argo cd file to update
+        required: false
+      SONARQUBE_PROJECT_KEY:
+        type: string
+        description: sonarqube project key
+        required: false
+      SONARQUBE_PROJECT_NAME:
+        type: string
+        description: sonarqube project name
+        required: false
+      SONARQUBE_QUALITY_GATE_CHECK:
+        type: string
+        description: SonarQube Quality Gate check
+        required: false
+      PUBLISH_UNIT_TEST_RESULTS:
+        type: string
+        description: sonarqube project name
+        required: false
+        default: false
+    secrets:
+      AWS_REGION:
+        description: aws region
+        required: true
+      AWS_ACCESS_KEY_ID:
+        description: aws access key
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: aws secret key
+        required: true
+      CHECKOUT_TOKEN:
+        description: checkout token
+        required: true
+      SONARQUBE_TOKEN:
+        description: SonarQube token
+        required: false
+      SONARQUBE_HOST:
+        description: SonarQube host
+        required: false
+
+name: DEV - deploy
+
+jobs:
+  build:
+    name: Build-Docker-Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ inputs.JAVA_VERSION_DISTRIBUTION }}
+          java-version: ${{ inputs.JAVA_VERSION }}
+
+      - name: Build with Gradle
+        env:
+          CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/build-with-gradle.sh
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        if: inputs.SONARQUBE_PROJECT_KEY != ''
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
+
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        if: |
+          inputs.SONARQUBE_PROJECT_KEY != '' &&
+          inputs.SONARQUBE_QUALITY_GATE_CHECK == 'true'
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: |
+          inputs.PUBLISH_UNIT_TEST_RESULTS == 'true'
+        with:
+          files: build/test-results/**/*.xml
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          DOCKER_FILE: ${{ inputs.DOCKER_FILE }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/build-tag-push-docker-image-to-aws-ecr.sh
+      
+      - name: Short sha
+        id: short_sha
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/create-short-sha.sh
+
+      - name: Scan Docker image
+        id: docker-scan
+        uses: alexjurkiewicz/ecr-scan-image@v1.7.0
+        with:
+          repository: ${{ inputs.ECR_REPOSITORY }}
+          tag: ${{ inputs.BUILT_BRANCH }}-${{ steps.short_sha.outputs.short_sha }}
+          fail_threshold: critical
+
+  deploy:
+    name: ArgoCD Deploy
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
+      - name: Extract branch name
+        id: extract_branch
+        shell: bash
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/common/extract-branch.sh
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Checkout ArgoCD
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.ARGO_CD_REPO }}
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: argocd
+          ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
+
+      - name: Create local changes
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/create-local-changes.sh
+
+      - name: Commit files
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/commit-files.sh

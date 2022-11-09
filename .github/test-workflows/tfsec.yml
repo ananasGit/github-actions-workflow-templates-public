@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    inputs:
+      argocd-event:
+        type: string
+        description: ArgoCD Event enabled
+        required: false
+      webhook_url:
+        type: string
+        description: URL for webhook trigger
+        required: false
+    secrets:
+      sonar_host_url:
+        description: SonarQube host url
+        required: true
+      sonar_token:
+        description: Token for authorization with SonarQube
+        required: true
+      webhook_secret:
+        description: Secret for webhook trigger
+        required: false
+
+name: SonarQube Scan
+
+jobs:
+  sonar:
+    name: SonarQube check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar_token }}
+          SONAR_HOST_URL: ${{ secrets.sonar_host_url }}
+
+      - name: SonarQube Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.sonar_token }}
+          SONAR_HOST_URL: ${{ secrets.sonar_host_url }}
+
+  argowf-trigger:
+    name: Argo Workflow Trigger
+    runs-on: ubuntu-latest
+    if: ${{ inputs.argocd-event == 'enabled' }}
+    needs: sonar
+    steps:
+      - name: Trigger
+        uses: distributhor/workflow-webhook@v2
+        env:
+          webhook_url: ${{ inputs.webhook_url }}${{ github.event.repository.name }}
+          webhook_secret: ${{ secrets.webhook_secret }}

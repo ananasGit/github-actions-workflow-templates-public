@@ -1,0 +1,85 @@
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        type: string
+        description: ecr repository
+        required: true
+      BUILT_BRANCH:
+        type: string
+        description: built branch
+        required: true
+      ARGO_CD_REPO:
+        type: string
+        description: argo cd repo
+        required: false
+      ARGO_CD_REPO_BRANCH:
+        type: string
+        description: argo cd repo branch
+        required: false
+      ARGO_CD_FILE_TO_UPDATE:
+        type: string
+        description: argo cd file to update
+        required: false
+
+    secrets:
+      AWS_REGION:
+        description: aws region
+        required: true
+      AWS_ACCESS_KEY_ID:
+        description: aws access key
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: aws secret key
+        required: true
+      CHECKOUT_TOKEN:
+        description: checkout token
+        required: true
+
+name: CAP deploy
+
+jobs:
+
+  deploy:
+    name: ArgoCD Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
+      - name: Checkout argoCD repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.ARGO_CD_REPO }}
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: argocd
+          ref: ${{ inputs.ARGO_CD_REPO_BRANCH }}
+
+      - name: Create local changes
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.BUILT_BRANCH }}
+          ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/cap/create-local-changes.sh
+
+      - name: Commit files
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/cap/commit-files.sh
