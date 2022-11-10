@@ -99,7 +99,7 @@ jobs:
         env:
           CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/build-with-gradle.sh
+          $GITHUB_WORKSPACE/workflow-scripts/dev/build-with-gradle-cache.sh
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
