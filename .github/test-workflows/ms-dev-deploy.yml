@@ -93,6 +93,7 @@ jobs:
         with:
           distribution: ${{ inputs.JAVA_VERSION_DISTRIBUTION }}
           java-version: ${{ inputs.JAVA_VERSION }}
+          cache: gradle
 
       - name: Build with Gradle
         env:
