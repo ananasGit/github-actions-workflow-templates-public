@@ -1,3 +1,15 @@
+on:
+  workflow_call:
+    inputs:
+      NODE_VERSION:
+        type: string
+        description: node version
+        required: true
+      FEATURE_FLAGS:
+        type: string
+        description: generate active feature flags file
+        required: false
+
 name: QA - deploy
 jobs:
   test_code_freeze:
@@ -88,7 +100,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: actions/setup-node@v1
         with:
-          node-version: "12.x"
+          node-version: ${{ inputs.NODE_VERSION }}
       - name: Install NPM dependencies
         run: |
           $GITHUB_WORKSPACE/worflow-scripts/qa/npm-install-dependencies.sh
@@ -99,6 +111,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FETCH_LICENSE: true
           ENABLE_OSS_RISK: true
+      - name: Generate active feature flags file
+        if: inputs.FEATURE_FLAGS != ''
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/feature-flags-tracker.sh
       - uses: actions/upload-artifact@v1
         with:
           name: reports
