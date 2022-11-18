@@ -112,7 +112,8 @@ jobs:
           FETCH_LICENSE: true
           ENABLE_OSS_RISK: true
       - name: Generate active feature flags file
-        if: inputs.FEATURE_FLAGS != ''
+        if: |
+          inputs.FEATURE_FLAGS == 'true'
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/qa/feature-flags-tracker.sh
       - uses: actions/upload-artifact@v1
