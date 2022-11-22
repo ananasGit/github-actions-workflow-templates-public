@@ -130,7 +130,7 @@ jobs:
 
       - name: Add secrets in .npmrc
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/qa/add-secrets-in-npm.sh
+          ananasGit/github-actions-workflow-templates-scripts/qa/add-secrets-in-npm.sh
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
