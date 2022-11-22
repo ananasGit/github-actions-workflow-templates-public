@@ -129,8 +129,10 @@ jobs:
           fetch-depth: 1
 
       - name: Add secrets in .npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          ananasGit/github-actions-workflow-templates-scripts/qa/add-secrets-in-npm.sh
+          $GITHUB_WORKSPACE/workflow-scripts/qa/add-secrets-in-npm.sh
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
