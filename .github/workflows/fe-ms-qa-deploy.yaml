@@ -1,0 +1,137 @@
+on:
+  workflow_call:
+    inputs:
+      NODE_VERSION:
+        type: string
+        description: node version
+        required: true
+      FEATURE_FLAGS:
+        type: string
+        description: generate active feature flags file
+        required: false
+
+name: QA - deploy
+jobs:
+  test_code_freeze:
+    name: Verify Code freeze enabled
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
+      - name: Verify CODE FREEZE
+        shell: bash
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/verify-code-freeze.sh
+  validate_deploy:
+    name: Validate Tag for skipping deployment
+    runs-on: ubuntu-latest
+    needs: test_code_freeze
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+
+      - name: Find Tag
+        id: tagger
+        uses: jimschubert/query-tag-action@v1
+        with:
+          include: ${{ inputs.SKIP_TAG }}
+          commit-ish: 'HEAD~'
+        continue-on-error: true
+
+      - name: Show Tag
+        id: display
+        env:
+          TAG: ${{ steps.tagger.outputs.tag }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/show-tag.sh
+
+      - name: Abort job on tag
+        env:
+          TAG: ${{ steps.tagger.outputs.tag }}
+          SKIP_TAG: ${{ inputs.SKIP_TAG }}
+          GIT_REF: ${{ inputs.GIT_REF }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/abort-job-on-tag.sh
+  deploy:
+    name: Deploy on env
+    runs-on: ubuntu-latest
+    needs: validate_deploy
+
+    steps:
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v3
+        if: inputs.GIT_REF == ''
+        with:
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          ref: master
+
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v3
+        if: inputs.GIT_REF != ''
+        with:
+          ref: ${{ inputs.GIT_REF }}
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
+          fetch-depth: 1
+
+      - name: Add secrets in .npmrc
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/add-secrets-in-npm.sh
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+      - name: Install NPM dependencies
+        run: |
+          $GITHUB_WORKSPACE/worflow-scripts/qa/npm-install-dependencies.sh
+      - name: Security and Licence Scan
+        uses: ShiftLeftSecurity/scan-action@v1.3.0
+        env:
+          WORKSPACE: ""
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FETCH_LICENSE: true
+          ENABLE_OSS_RISK: true
+      - name: Generate active feature flags file
+        if: |
+          inputs.FEATURE_FLAGS == 'true'
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/feature-flags-tracker.sh
+      - uses: actions/upload-artifact@v1
+        with:
+          name: reports
+          path: reports
+      - name: Check licenses
+        uses: tangro/actions-license-check@v1.0.7
+        with:
+          allowed-licenses: 'MIT; ISC; Apache-2.0; BSD; Unlicense; LicenseRef-LICENSE;'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        continue-on-error: true
+
+      - name: Deploy static site to S3 bucket
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/deploy-static-site-to-s3.sh
+      - name: Tag ms repo origin
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/qa/tag-ms-repo-origin.sh
