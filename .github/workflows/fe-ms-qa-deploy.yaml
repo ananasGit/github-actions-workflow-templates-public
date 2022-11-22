@@ -9,7 +9,43 @@ on:
         type: string
         description: generate active feature flags file
         required: false
-
+      S3_BUCKET:
+        type: string
+        description: s3 bucket
+        required: false
+      BUILD_ENV:
+        type: string
+        description: build env for
+        required: true
+      NPM_BUILD_FOLDER:
+        type: string
+        description: npm build forder
+        required: true
+      AWS_CLOUDFRONT_ID:
+        type: string
+        description: cloudfront id
+        required: true
+      SKIP_TAG:
+        type: string
+        description: skip tag to stop automatically deploy
+        required: true
+      GIT_REF:
+        type: string
+        description: Git ref for deploy
+        required: false
+    secrets:
+      AWS_REGION:
+        description: aws region
+        required: true
+      AWS_ACCESS_KEY_ID:
+        description: aws access key
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: aws secret key
+        required: true
+      CHECKOUT_TOKEN:
+        description: checkout token
+        required: true
 name: QA - deploy
 jobs:
   test_code_freeze:
