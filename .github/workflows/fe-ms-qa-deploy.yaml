@@ -126,7 +126,6 @@ jobs:
           repository: 'ananasGit/github-actions-workflow-templates-scripts'
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: 'workflow-scripts'
-          fetch-depth: 1
 
       - name: Add secrets in .npmrc
         env:
