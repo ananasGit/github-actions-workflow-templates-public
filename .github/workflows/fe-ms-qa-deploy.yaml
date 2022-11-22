@@ -46,7 +46,6 @@ on:
       CHECKOUT_TOKEN:
         description: checkout token
         required: true
-
 name: QA - deploy
 jobs:
   test_code_freeze:
