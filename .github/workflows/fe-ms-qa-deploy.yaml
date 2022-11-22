@@ -46,6 +46,9 @@ on:
       CHECKOUT_TOKEN:
         description: checkout token
         required: true
+      NPM_TOKEN:
+        description: npm token
+        required: true
 
 name: QA - deploy
 jobs:
