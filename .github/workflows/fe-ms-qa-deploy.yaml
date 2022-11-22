@@ -129,7 +129,7 @@ jobs:
 
       - name: Add secrets in .npmrc
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ inputs.NPM_TOKEN }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/qa/add-secrets-in-npm.sh
 
