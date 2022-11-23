@@ -144,6 +144,8 @@ jobs:
         with:
           node-version: ${{ inputs.NODE_VERSION }}
       - name: Install NPM dependencies
+        env:
+          BUILD_ENV: ${{ inputs.BUILD_ENV }}
         run: |
           $GITHUB_WORKSPACE/worflow-scripts/qa/npm-install-dependencies.sh
       - name: Security and Licence Scan
