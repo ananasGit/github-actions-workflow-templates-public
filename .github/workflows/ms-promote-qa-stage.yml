@@ -129,6 +129,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_NAME_TAG: ${{ inputs.IMAGE_NAME_TAG }}
+          IMAGE_TAG: ${{ steps.commit_hash.outputs.app_commit_hash }}
           ARGO_CD_FILE_TO_UPDATE: ${{ inputs.ARGO_CD_FILE_TO_UPDATE }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/create-local-changes.sh
@@ -196,6 +197,6 @@ jobs:
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG_DEV: ${{ inputs.IMAGE_NAME_TAG }}
-          IMAGE_TAG: ${{ inputs.IMAGE_NAME_TAG }}
+          IMAGE_TAG: ${{needs.get_commit_hash.outputs.app_qa_commit_hash}}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/promote-qa-stage/promote-push-image-to-prod-ecr.sh
