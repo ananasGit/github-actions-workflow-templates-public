@@ -78,7 +78,9 @@ jobs:
           CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
+          npm install
+          nmp run build:${{ env.BUILD_ENV }}
+
       - name: Add secrets in .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
