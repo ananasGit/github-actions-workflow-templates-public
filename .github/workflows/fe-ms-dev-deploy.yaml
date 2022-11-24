@@ -106,20 +106,10 @@ jobs:
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
 
-      - if: |
-          inputs.SONARQUBE == 'true'
-        name: SonarQube Scan
-        uses: kitabisa/sonarqube-action@v1.2.0
-        with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectKey: ${{ env.SONARQUBE_PROJECT_KEY }}
-          projectName: ${{ env.SONARQUBE_PROJECT_NAME }}
-          projectVersion: ${{ github.sha }}
       - name: Deploy static site to S3 bucket
         env:
           S3_BUCKET: ${{ inputs.S3_BUCKET }}
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
           AWS_CLOUDFRONT_ID: ${{ inputs.AWS_CLOUDFRONT_ID }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/deploy-static-site-to-s3-bucket.sh
+          $GITHUB_WORKSPACE/workflow-scripts/dev/deploy-static-site-to-s3.sh
