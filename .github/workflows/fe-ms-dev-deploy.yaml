@@ -37,6 +37,10 @@ on:
         type: string
         description: sonarqube project name
         required: false
+      SONARQUBE:
+        type: string
+        description: sonarqube
+        required: false
     secrets:
       AWS_REGION:
         description: aws region
@@ -103,9 +107,9 @@ jobs:
           $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
 
       - name: SonarQube Scan
+        uses: kitabisa/sonarqube-action@v1.2.0
         if: |
           inputs.SONARQUBE == 'true'
-        uses: kitabisa/sonarqube-action@v1.2.0
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
