@@ -105,11 +105,12 @@ jobs:
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
+        
 
-      - name: SonarQube Scan
-        uses: kitabisa/sonarqube-action@v1.2.0
-        if: |
+      - if: |
           inputs.SONARQUBE == 'true'
+        name: SonarQube Scan
+        uses: kitabisa/sonarqube-action@v1.2.0
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
