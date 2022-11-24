@@ -72,12 +72,18 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: 'workflow-scripts'
 
+      - name: Install NPM dependencies
+        env:
+          BUILD_ENV: ${{ inputs.BUILD_ENV }}
+          CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
+          NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
       - name: Add secrets in .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/add-secrets-in-npm.sh
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -93,13 +99,7 @@ jobs:
           inputs.FEATURE_FLAGS == 'true'
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
-      - name: Install NPM dependencies
-        env:
-          BUILD_ENV: ${{ inputs.BUILD_ENV }}
-          CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
-          NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
-        run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
+      
 
       - name: SonarQube Scan
         if: |
