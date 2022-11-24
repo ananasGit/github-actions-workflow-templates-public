@@ -97,8 +97,7 @@ jobs:
         env:
           BUILD_ENV: ${{ inputs.BUILD_ENV }}
         run: |
-          npm install
-          npm run build:${{ env.BUILD_ENV }}
+          $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
 
       - name: SonarQube Scan
         if: |
