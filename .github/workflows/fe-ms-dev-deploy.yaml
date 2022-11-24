@@ -62,7 +62,7 @@ on:
 
 name: DEV - Deploy
 jobs:
-  deploy:
+  build:
     name: Deploy on env
     runs-on: ubuntu-latest
     steps:
