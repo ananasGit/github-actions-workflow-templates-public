@@ -105,7 +105,6 @@ jobs:
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
-        
 
       - if: |
           inputs.SONARQUBE == 'true'
