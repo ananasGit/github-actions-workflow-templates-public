@@ -37,10 +37,6 @@ on:
         type: string
         description: sonarqube name
         required: false
-      SONARQUBE:
-        type: string
-        description: is it used
-        required: false
     secrets:
       AWS_REGION:
         description: aws region
@@ -108,13 +104,13 @@ jobs:
           $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
 
       - name: SonarQube Scan
-        if: ${{ inputs.SONARQUBE }} == 'true'
         uses: kitabisa/sonarqube-action@v1.2.0
-        with:
+        if: inputs.SONARQUBE_PROJECT_KEY != ''
+        env:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectKey: ${{ env.SONARQUBE_PROJECT_KEY }}
-          projectName: ${{ env.SONARQUBE_PROJECT_NAME }}
+          projectKey: ${{ inputs.SONARQUBE_PROJECT_KEY }}
+          projectName: ${{ inputs.SONARQUBE_PROJECT_NAME }}
           projectVersion: ${{ github.sha }}
       - name: Deploy static site to S3 bucket
         env:
