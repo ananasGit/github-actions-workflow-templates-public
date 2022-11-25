@@ -37,10 +37,6 @@ on:
         type: string
         description: sonarqube name
         required: false
-      SONARQUBE:
-        type: string
-        description: is it used
-        required: false
     secrets:
       AWS_REGION:
         description: aws region
@@ -109,7 +105,7 @@ jobs:
 
       - name: SonarQube Scan
         uses: kitabisa/sonarqube-action@v1.2.0
-        if: inputs.SONARQUBE != ''
+        if: inputs.SONARQUBE_PROJECT_KEY != ''
         env:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
