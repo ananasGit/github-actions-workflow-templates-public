@@ -33,6 +33,10 @@ on:
         type: string
         description: sonarqube
         required: false
+      SONARQUBE_PROJECT_NAME:
+        type: string
+        description: sonarqube name
+        required: false
       SONARQUBE:
         type: string
         description: is it used
