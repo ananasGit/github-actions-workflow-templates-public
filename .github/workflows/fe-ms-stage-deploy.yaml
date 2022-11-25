@@ -51,7 +51,18 @@ jobs:
     name: Deploy on env
     runs-on: ubuntu-latest
     steps:
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+        with:
+          ref: master
 
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != '' &&
+          inputs.REF == 'false'
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
 
       - uses: actions/checkout@v3
         with:
@@ -85,9 +96,6 @@ jobs:
           $GITHUB_WORKSPACE/workflow-scripts/stage/add-secrets-in-npm.sh
 
       - name: Install NPM dependencies
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          CHECKOUT_TOKEN: ${{ secrets.CHECKOUT_TOKEN }}
         run: |
           npm install
           npm run build:${{ inputs.BUILD_ENV }}
