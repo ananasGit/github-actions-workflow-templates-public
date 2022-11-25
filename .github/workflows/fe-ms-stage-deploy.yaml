@@ -47,8 +47,8 @@ on:
         required: false
 name: STAGE - Deploy
 jobs:
-  clone:
-    name: clone repository
+  deploy:
+    name: Deploy on env
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository (Latest)
@@ -63,11 +63,6 @@ jobs:
           inputs.REF == 'false'
         with:
           ref: ${{ github.event.inputs.git-ref }}
-
-  deploy:
-    name: Deploy on env
-    runs-on: ubuntu-latest
-    steps:
 
       - uses: actions/checkout@v3
         with:
