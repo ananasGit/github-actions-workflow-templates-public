@@ -109,8 +109,8 @@ jobs:
         env:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectKey: ${{ inputs.SONARQUBE_PROJECT_KEY }}
-          projectName: ${{ inputs.SONARQUBE_PROJECT_NAME }}
+          projectKey: ${{ env.SONARQUBE_PROJECT_KEY }}
+          projectName: ${{ env.SONARQUBE_PROJECT_NAME }}
           projectVersion: ${{ github.sha }}
       - name: Deploy static site to S3 bucket
         env:
