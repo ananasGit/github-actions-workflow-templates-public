@@ -106,7 +106,7 @@ jobs:
       - name: SonarQube Scan
         uses: kitabisa/sonarqube-action@v1.2.0
         if: inputs.SONARQUBE_PROJECT_KEY != ''
-        env:
+        with:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
           projectKey: ${{ inputs.SONARQUBE_PROJECT_KEY }}
