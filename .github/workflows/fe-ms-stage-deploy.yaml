@@ -96,11 +96,9 @@ jobs:
           $GITHUB_WORKSPACE/workflow-scripts/stage/add-secrets-in-npm.sh
 
       - name: Install NPM dependencies
-        env:
-          BUILD_ENV: ${{ inputs.BUILD_ENV }}
         run: |
           npm install
-          npm run build:${{ env.BUILD_ENV }}
+          npm run build:${{ inputs.BUILD_ENV }}
 
       - name: Deploy static site to S3 bucket
         env:
