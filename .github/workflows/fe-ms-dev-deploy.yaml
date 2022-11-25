@@ -104,8 +104,8 @@ jobs:
           $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
 
       - name: SonarQube Scan
-        if: ${{ inputs.SONARQUBE_PROJECT_KEY }} != ''
         uses: kitabisa/sonarqube-action@v1.2.0
+        if: inputs.SONARQUBE_PROJECT_KEY != ''
         env:
           host: ${{ secrets.SONARQUBE_HOST }}
           login: ${{ secrets.SONARQUBE_TOKEN }}
