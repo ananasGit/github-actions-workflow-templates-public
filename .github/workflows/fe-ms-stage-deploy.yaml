@@ -103,7 +103,6 @@ jobs:
       - name: Install NPM dependencies
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        with:
           token: ${{ secrets.CHECKOUT_TOKEN }}
         run: |
           npm install
