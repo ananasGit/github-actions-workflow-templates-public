@@ -47,8 +47,8 @@ on:
         required: false
 name: STAGE - Deploy
 jobs:
-  deploy:
-    name: Deploy on env
+  clone:
+    name: clone repository
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository (Latest)
@@ -64,9 +64,14 @@ jobs:
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
+  deploy:
+    name: Deploy on env
+    runs-on: ubuntu-latest
+    steps:
+
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 1
       - uses: actions/checkout@v3
         with:
           repository: 'ananasGit/github-actions-workflow-templates-scripts'
