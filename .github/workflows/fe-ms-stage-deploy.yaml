@@ -51,16 +51,6 @@ jobs:
     name: Deploy on env
     runs-on: ubuntu-latest
     steps:
-
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-      - uses: actions/checkout@v3
-        with:
-          repository: 'ananasGit/github-actions-workflow-templates-scripts'
-          token: ${{ secrets.CHECKOUT_TOKEN }}
-          path: 'workflow-scripts'
-
       - name: Clone Repository (Latest)
         uses: actions/checkout@v2
         if: github.event.inputs.git-ref == ''
@@ -70,9 +60,18 @@ jobs:
       - name: Clone Repository (Custom Ref)
         uses: actions/checkout@v2
         if: github.event.inputs.git-ref != '' &&
-            inputs.REF == 'false'
+          inputs.REF == 'false'
         with:
           ref: ${{ github.event.inputs.git-ref }}
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - uses: actions/checkout@v3
+        with:
+          repository: 'ananasGit/github-actions-workflow-templates-scripts'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          path: 'workflow-scripts'
 
       - name: Add secrets in .npmrc
         env:
