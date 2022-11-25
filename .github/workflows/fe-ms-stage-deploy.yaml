@@ -101,6 +101,10 @@ jobs:
           $GITHUB_WORKSPACE/workflow-scripts/stage/add-secrets-in-npm.sh
 
       - name: Install NPM dependencies
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          token: ${{ secrets.CHECKOUT_TOKEN }}
         run: |
           npm install
           npm run build:${{ inputs.BUILD_ENV }}
