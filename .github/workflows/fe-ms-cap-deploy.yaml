@@ -75,7 +75,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ inputs.NODE_VERSION }}
-                          - name: Install NPM dependencies
+      - name: Install NPM dependencies
         env:
           BUILD_ENV: ${{ inputs.BUILD_ENV }}
         run: |
