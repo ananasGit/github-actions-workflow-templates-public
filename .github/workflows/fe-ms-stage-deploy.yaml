@@ -70,7 +70,7 @@ jobs:
       - name: Clone Repository (Custom Ref)
         uses: actions/checkout@v2
         if: github.event.inputs.git-ref != '' &&
-          inputs.REF != ''
+            inputs.REF == 'false'
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
