@@ -99,7 +99,7 @@ jobs:
           npm run build:${{ env.BUILD_ENV }}
 
       - name: Generate active feature flags file
-        if: ${{ inputs.FEATURE_FLAGS }} == 'true'
+        if: inputs.FEATURE_FLAGS  == 'true'
         run: |
           $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
 
