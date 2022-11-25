@@ -92,7 +92,7 @@ jobs:
       - name: Generate active feature flags file
         if: inputs.FEATURE_FLAGS  == 'true'
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/add-secrets-in-npm.sh
+          $GITHUB_WORKSPACE/workflow-scripts/stage/add-secrets-in-npm.sh
 
       - name: Install NPM dependencies
         env:
