@@ -35,7 +35,11 @@ on:
         required: false
       SONARQUBE_PROJECT_NAME:
         type: string
-        description: sonarqube project name
+        description: sonarqube name
+        required: false
+      SONARQUBE:
+        type: string
+        description: is it used
         required: false
     secrets:
       AWS_REGION:
@@ -68,6 +72,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          fetch-depth: 1
+      - uses: actions/checkout@v3
+        with:
           repository: 'ananasGit/github-actions-workflow-templates-scripts'
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: 'workflow-scripts'
@@ -88,20 +95,20 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ inputs.NODE_VERSION }}
-      - name: Generate active feature flags file
-        if: |
-          inputs.FEATURE_FLAGS == 'true'
-        run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
       - name: Install NPM dependencies
         env:
           BUILD_ENV: ${{ inputs.BUILD_ENV }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/npm-install-dependencies.sh
+          npm install
+          npm run build:${{ env.BUILD_ENV }}
+
+      - name: Generate active feature flags file
+        if: ${{ inputs.FEATURE_FLAGS }} == 'true'
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
 
       - name: SonarQube Scan
-        if: |
-          inputs.SONARQUBE == 'true'
+        if: ${{ inputs.SONARQUBE }} == 'true'
         uses: kitabisa/sonarqube-action@v1.2.0
         with:
           host: ${{ secrets.SONARQUBE_HOST }}
@@ -115,4 +122,4 @@ jobs:
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
           AWS_CLOUDFRONT_ID: ${{ inputs.AWS_CLOUDFRONT_ID }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/deploy-static-site-to-s3-bucket.sh
+          $GITHUB_WORKSPACE/workflow-scripts/dev/deploy-static-site-to-s3.sh
