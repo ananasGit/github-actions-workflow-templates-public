@@ -5,14 +5,10 @@ on:
         type: string
         description: node version
         required: true
-      FEATURE_FLAGS:
-        type: string
-        description: generate active feature flags file
-        required: false
       S3_BUCKET:
         type: string
         description: s3 bucket
-        required: false
+        required: true
       BUILD_ENV:
         type: string
         description: build env for
@@ -25,17 +21,9 @@ on:
         type: string
         description: cloudfront id
         required: true
-      GIT_REF:
+      FEATURE_FLAGS:
         type: string
-        description: Git ref for deploy
-        required: false
-      SONARQUBE_PROJECT_KEY:
-        type: string
-        description: sonarqube
-        required: false
-      SONARQUBE_PROJECT_NAME:
-        type: string
-        description: sonarqube name
+        description: generate active feature flags file
         required: false
     secrets:
       AWS_REGION:
@@ -53,22 +41,13 @@ on:
       NPM_TOKEN:
         description: npm token
         required: false
-      SONARQUBE_HOST:
-        description: sonarqube host
-        required: false
-      SONARQUBE_TOKEN:
-        description: sonarqube token
-        required: false
-
-name: DEV - Deploy
+name: SANDBOX - Deploy
 jobs:
   deploy:
     name: Deploy on env
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
       - uses: actions/checkout@v3
         with:
           repository: 'ananasGit/github-actions-workflow-templates-scripts'
@@ -79,7 +58,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/add-secrets-in-npm.sh
+          $GITHUB_WORKSPACE/workflow-scripts/sandbox/add-secrets-in-npm.sh
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -88,34 +67,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Generate active feature flags file
+        if: inputs.FEATURE_FLAGS  == 'true'
+        run: |
+          $GITHUB_WORKSPACE/workflow-scripts/sandbox/feature-flags-tracker.sh
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ inputs.NODE_VERSION }}
       - name: Install NPM dependencies
-        env:
-          BUILD_ENV: ${{ inputs.BUILD_ENV }}
         run: |
           npm install
-          npm run build:${{ env.BUILD_ENV }}
+          npm run build:${{ inputs.BUILD_ENV }}
 
-      - name: Generate active feature flags file
-        if: inputs.FEATURE_FLAGS  == 'true'
-        run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/feature-flags-tracker.sh
-
-      - name: SonarQube Scan
-        uses: kitabisa/sonarqube-action@v1.2.0
-        if: inputs.SONARQUBE_PROJECT_KEY != ''
-        with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
-          projectKey: ${{ inputs.SONARQUBE_PROJECT_KEY }}
-          projectName: ${{ inputs.SONARQUBE_PROJECT_NAME }}
-          projectVersion: ${{ github.sha }}
       - name: Deploy static site to S3 bucket
         env:
           S3_BUCKET: ${{ inputs.S3_BUCKET }}
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
           AWS_CLOUDFRONT_ID: ${{ inputs.AWS_CLOUDFRONT_ID }}
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/dev/deploy-static-site-to-s3.sh
+          $GITHUB_WORKSPACE/workflow-scripts/sandbox/deploy-static-site-to-s3.sh
