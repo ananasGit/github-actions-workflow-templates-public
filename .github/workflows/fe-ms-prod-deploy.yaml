@@ -29,14 +29,7 @@ on:
         type: string
         description: Git ref for deploy
         required: false
-      SONARQUBE_PROJECT_KEY:
-        type: string
-        description: sonarqube
-        required: false
-      SONARQUBE:
-        type: string
-        description: is it used
-        required: false
+
     secrets:
       AWS_REGION:
         description: aws region
