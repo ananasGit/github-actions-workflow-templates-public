@@ -25,10 +25,6 @@ on:
         type: string
         description: cloudfront id
         required: true
-      GIT_REF:
-        type: string
-        description: Git ref for deploy
-        required: false
     secrets:
       AWS_REGION:
         description: aws region
