@@ -100,7 +100,7 @@ jobs:
       - name: Generate active feature flags file
         if: inputs.FEATURE_FLAGS  == 'true'
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/stage/add-secrets-in-npm.sh
+          $GITHUB_WORKSPACE/workflow-scripts/stage/feature-flags-tracker.sh
 
       - name: Deploy static site to S3 bucket
         env:
