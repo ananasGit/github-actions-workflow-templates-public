@@ -97,7 +97,7 @@ jobs:
       - name: Extract commit hash
         shell: bash
         run: |
-          echo "app_commit_hash=$(cat ${{ inputs.ARGO_ORIGIN_CHECKOUT_FOLDER }}/${{ inputs.ARGO_CD_FILE_TO_UPDATE }} | grep commit_hash | awk '{print $2}' )" >> $GITHUB_OUTPUT
+          echo "app_commit_hash=$(cat ${{ inputs.ARGO_ORIGIN_CHECKOUT_FOLDER }}/${{ inputs.ARGO_CD_FILE_TO_UPDATE }} | grep -m1 commit_hash | awk '{print $2}' )" >> $GITHUB_OUTPUT
         id: commit_hash
 
       - name: Show commit_hash
