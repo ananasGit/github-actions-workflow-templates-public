@@ -5,10 +5,14 @@ on:
         type: string
         description: node version
         required: true
+      FEATURE_FLAGS:
+        type: string
+        description: generate active feature flags file
+        required: false
       S3_BUCKET:
         type: string
         description: s3 bucket
-        required: true
+        required: false
       BUILD_ENV:
         type: string
         description: build env for
@@ -21,14 +25,6 @@ on:
         type: string
         description: cloudfront id
         required: true
-      FEATURE_FLAGS:
-        type: string
-        description: generate active feature flags file
-        required: false
-      REF:
-        type: string
-        description: flag for custom ref
-        required: false
     secrets:
       AWS_REGION:
         description: aws region
@@ -45,67 +41,47 @@ on:
       NPM_TOKEN:
         description: npm token
         required: false
-name: STAGE - Deploy
+name: PROD - Deploy
 jobs:
   deploy:
     name: Deploy on env
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Clone Replositorie(Latest)
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-      - name: Clone Repository (Latest)
-        uses: actions/checkout@v2
-        if: github.event.inputs.git-ref == ''
-        with:
-          ref: master
-
-      - name: Clone Repository (Custom Ref)
-        uses: actions/checkout@v2
-        if: github.event.inputs.git-ref != '' &&
-          inputs.REF == 'false'
-        with:
-          ref: ${{ github.event.inputs.git-ref }}
-
       - uses: actions/checkout@v3
         with:
           repository: 'ananasGit/github-actions-workflow-templates-scripts'
           token: ${{ secrets.CHECKOUT_TOKEN }}
           path: 'workflow-scripts'
-
       - name: Add secrets in .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          $GITHUB_WORKSPACE/workflow-scripts/stage/add-secrets-in-npm.sh
-
+        run:
+          $GITHUB_WORKSPACE/workflow-scripts/prod/add-secrets-in-npm.sh
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ inputs.NODE_VERSION }}
-
+      - name: Install NPM dependencies
+        env:
+          BUILD_ENV: ${{ inputs.BUILD_ENV }}
+        run: |
+            npm install
+            npm run build:${{ env.BUILD_ENV }}
       - name: Generate active feature flags file
         if: inputs.FEATURE_FLAGS  == 'true'
         run: |
-          $GITHUB_WORKSPACE/workflow-scripts/stage/feature-flags-tracker.sh
-
-      - name: Install NPM dependencies
-        run: |
-          npm install
-          npm run build:${{ inputs.BUILD_ENV }}
-
-
+          $GITHUB_WORKSPACE/workflow-scripts/prod/feature-flags-tracker.sh
       - name: Deploy static site to S3 bucket
         env:
           S3_BUCKET: ${{ inputs.S3_BUCKET }}
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
           AWS_CLOUDFRONT_ID: ${{ inputs.AWS_CLOUDFRONT_ID }}
-        run: |
-          $GITHUB_WORKSPACE/workflow-scripts/stage/deploy-static-site-to-s3.sh
+        run:
+          $GITHUB_WORKSPACE/workflow-scripts/prod/deploy-static-site-to-s3.sh
