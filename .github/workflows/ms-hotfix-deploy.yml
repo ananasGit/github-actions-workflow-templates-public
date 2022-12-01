@@ -42,6 +42,18 @@ on:
         description: sonarqube project name
         required: false
         default: "false"
+      SONARQUBE_PROJECT_KEY:
+        type: string
+        description: sonarqube project key
+        required: false
+      SONARQUBE_PROJECT_NAME:
+        type: string
+        description: sonarqube project name
+        required: false
+      SONARQUBE_QUALITY_GATE_CHECK:
+        type: string
+        description: SonarQube Quality Gate check
+        required: false
     secrets:
       AWS_REGION:
         description: aws region
