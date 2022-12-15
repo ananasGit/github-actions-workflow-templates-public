@@ -47,8 +47,6 @@ jobs:
     name: Deploy on env
     runs-on: ubuntu-latest
     steps:
-      - name: Clone Replositorie(Latest)
-        uses: actions/checkout@v3
       - name: Clone Repository (Latest)
         uses: actions/checkout@v2
         if: github.event.inputs.git-ref == ''
