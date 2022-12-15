@@ -83,5 +83,5 @@ jobs:
           S3_BUCKET: ${{ inputs.S3_BUCKET }}
           NPM_BUILD_FOLDER: ${{ inputs.NPM_BUILD_FOLDER }}
           AWS_CLOUDFRONT_ID: ${{ inputs.AWS_CLOUDFRONT_ID }}
-        run:
+        run: |
           $GITHUB_WORKSPACE/workflow-scripts/prod/deploy-static-site-to-s3.sh
