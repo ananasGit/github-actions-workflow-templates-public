@@ -46,6 +46,12 @@ on:
       AWS_SECRET_ACCESS_KEY:
         description: aws secret key
         required: true
+      AWS_ACCESS_KEY_ID_PROD:
+        description: aws access key
+        required: true
+      AWS_SECRET_ACCESS_KEY_PROD:
+        description: aws secret key
+        required: true
       CHECKOUT_TOKEN:
         description: checkout token
         required: true
@@ -194,8 +200,6 @@ jobs:
         id: push-image
         env:
           AWS_REGION: eu-central-1
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
           ECR_REGISTRY_PROD: ${{ steps.login-ecr-prod.outputs.registry }}
           ECR_REGISTRY_DEV: ${{ steps.login-ecr-dev.outputs.registry }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
